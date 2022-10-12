@@ -1,0 +1,21 @@
+{
+  "name": "protokoly-sieci-web",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.ts",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "node": "^18.10.0",
+    "node-ssh": "^13.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^18.8.4",
+    "dotenv": "^16.0.3"
+  }
+}

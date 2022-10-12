@@ -11,7 +11,7 @@ const ssh = new NodeSSH();
       port: 22,
     });
 
-    console.log(await ssh.exec('who | cut -d " " -f 1 | uniq | wc -l', []));
+    console.log(await ssh.exec('users | tr " "  "\n" | sort -u | wc -l', []));
 
     process.exit();
   } catch (e) {

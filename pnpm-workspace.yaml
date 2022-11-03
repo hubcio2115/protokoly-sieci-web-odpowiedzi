@@ -1,0 +1,5 @@
+packages:
+  - '02-ssh-scripts'
+  - '03-sftp'
+  - '04-tunele-ssh'
+  - '05-restful-api/*'

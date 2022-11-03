@@ -1,14 +1,20 @@
 import express from 'express';
-import { initTRPC } from '@trpc/server';
+import { inferAsyncReturnType, initTRPC } from '@trpc/server';
 import * as trpcExpress from '@trpc/server/adapters/express';
 
-const createContext = ({ req, res }) => ({});
-const t = initTRPC.context().create();
+const createContext = ({
+  req,
+  res,
+}: trpcExpress.CreateExpressContextOptions) => ({});
+type Context = inferAsyncReturnType<typeof createContext>;
+
+const t = initTRPC.context<Context>().create();
 
 const appRouter = t.router({
   hello: t.procedure.query(() => 'hello'),
   bye: t.procedure.mutation(() => 'działa'),
 });
+export type AppRouter = typeof appRouter;
 
 const app = express();
 

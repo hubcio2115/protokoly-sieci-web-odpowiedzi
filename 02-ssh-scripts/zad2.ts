@@ -1,14 +1,12 @@
 import { NodeSSH } from 'node-ssh';
 import readline from 'readline';
 
-// Interface necessary for reading inputs in node
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
 });
 
-// This line checks if instance of e is of Error object or is it a string and then logs it in the console
-const handleError = (e) => {
+const handleError = (e: unknown) => {
   const message = e instanceof Error ? e.message : String(e);
 
   message.split(':')[2] === ' No such file or directory'
@@ -24,8 +22,8 @@ const ssh = new NodeSSH();
   try {
     await ssh.connect({
       host: 'sigma.ug.edu.pl',
-      username: '', // put your username here
-      privateKeyPath: '', // put your absolute path to your ssh private sigma key
+      username: 'hkowalski',
+      privateKeyPath: '/Users/hubertkowalski/.ssh/sigma',
       port: 22,
     });
 

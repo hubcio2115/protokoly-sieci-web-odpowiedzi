@@ -6,13 +6,12 @@ const ssh = new NodeSSH();
   try {
     await ssh.connect({
       host: 'sigma.ug.edu.pl',
-      username: '', // put your username here
-      privateKeyPath: '', // put your absolute path to your ssh private sigma key
+      username: 'hkowalski',
+      privateKeyPath: '/Users/hubertkowalski/.ssh/sigma',
       port: 22,
     });
 
     console.log(await ssh.exec('users | tr " "  "\n" | sort -u | wc -l', []));
-
     process.exit();
   } catch (e) {
     console.error(e);

@@ -9,9 +9,9 @@ import {
   checkIfMoveIsValid,
   createNewBoardWithChangedValue,
 } from './utils';
-import type { Game, Point } from './types';
+import type { Board, PointValue } from './types';
 
-const games = new Map<string, Game>();
+const games = new Map<string, Board>();
 
 const t = initTRPC.create();
 
@@ -21,13 +21,11 @@ const router = t.router;
 const appRouter = router({
   startGame: publicProcedure.query(() => {
     const newGameId = uuid();
-    const newGameBoard = [...Array(3).keys()]
-      .map((y) => {
-        return [...Array(3).keys()].map((x): Point => {
-          return { value: 0, coords: { x, y } };
-        });
-      })
-      .flat();
+    const newGameBoard = [...Array(3).keys()].map((_) => {
+      return [...Array(3).keys()].map((_): PointValue => {
+        return 0;
+      });
+    });
 
     games.set(newGameId, { board: newGameBoard });
     return { id: newGameId, board: newGameBoard };
@@ -42,13 +40,13 @@ const appRouter = router({
     .input(
       z.object({
         id: z.string().uuid(),
-        move: z.object({ x: z.number(), y: z.number() }),
+        move: z.number().int().min(0).max(10),
       }),
     )
-    .query(({ input: { id, move: coords } }) => {
-      const game = checkIfMoveIsValid(id, games, coords);
+    .query(({ input: { id, move: index } }) => {
+      const game = checkIfMoveIsValid(id, games, index);
 
-      const newBoard = createNewBoardWithChangedValue(game, coords, 1);
+      const newBoard = createNewBoardWithChangedValue(game, index, 1);
 
       games.set(id, { board: newBoard });
 
@@ -66,13 +64,13 @@ const appRouter = router({
     .input(
       z.object({
         id: z.string().uuid(),
-        move: z.object({ x: z.number(), y: z.number() }),
+        move: z.number().int().min(0).max(10),
       }),
     )
-    .query(({ input: { id, move: coords } }) => {
+    .query(({ input: { id, move: index } }) => {
       const game = checkIfGameExists(id, games);
 
-      const newBoard = createNewBoardWithChangedValue(game, coords, 0);
+      const newBoard = createNewBoardWithChangedValue(game, index, 0);
 
       games.set(id, { board: newBoard });
       return { id, board: newBoard };
@@ -82,32 +80,23 @@ const appRouter = router({
     .input(
       z.object({
         id: z.string().uuid(),
-        coords: z.object({ x: z.number(), y: z.number() }),
-        newCoords: z.object({ x: z.number(), y: z.number() }),
+        coords: z.number().int().min(0).max(10),
+        newCoords: z.number().int().min(0).max(10),
       }),
     )
     .query(({ input: { id, coords, newCoords } }) => {
       const game = checkIfGameExists(id, games);
 
-      const point = game.board.find(
-        (point) => point.coords.x === coords.x && point.coords.y === coords.y,
-      )!;
+      const point = game.board.flat()[coords];
 
-      const pointToBeSwapped = game.board.find(
-        (point) =>
-          point.coords.x === newCoords.x && point.coords.y === newCoords.y,
-      )!;
+      const pointToBeSwapped = game.board.flat()[coords];
 
       const newBoard = createNewBoardWithChangedValue(
         {
-          board: createNewBoardWithChangedValue(
-            game,
-            point.coords,
-            pointToBeSwapped.value,
-          ),
+          board: createNewBoardWithChangedValue(game, coords, pointToBeSwapped),
         },
-        pointToBeSwapped.coords,
-        point.value,
+        newCoords,
+        point,
       );
 
       return { id, board: newBoard };

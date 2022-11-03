@@ -1,21 +1,27 @@
 import { TRPCError } from '@trpc/server';
-import type { Point, Game } from './types';
+import type { PointValue, Board } from './types';
 
 export const createNewBoardWithChangedValue = (
-  game: Game,
-  coords: Point['coords'],
-  value: Point['value'],
+  game: Board,
+  index: number,
+  value: PointValue,
 ) => {
   return [
-    ...game.board.filter(
-      ({ coords: elCoords }) =>
-        coords.x === elCoords.x && elCoords.y === coords.y,
-    ),
-    { value, coords },
-  ];
+    ...game.board.flat().slice(0, index),
+    value,
+    ...game.board.flat().slice(index + 1),
+  ].reduce((acc: PointValue[][], el, idx) => {
+    const currentRow = Math.floor(idx / 3);
+
+    if (!acc[currentRow]) {
+      return [...acc, [el]];
+    }
+
+    return [...acc, [...acc[currentRow], el]];
+  }, []);
 };
 
-export const checkIfGameExists = (id: string, games: Map<string, Game>) => {
+export const checkIfGameExists = (id: string, games: Map<string, Board>) => {
   const game = games.get(id);
 
   if (!game)
@@ -29,15 +35,12 @@ export const checkIfGameExists = (id: string, games: Map<string, Game>) => {
 
 export const checkIfMoveIsValid = (
   id: string,
-  games: Map<string, Game>,
-  coords: Point['coords'],
+  games: Map<string, Board>,
+  index: number,
 ) => {
   const game = checkIfGameExists(id, games);
 
-  const valueOnCoords = game.board.find(
-    ({ coords: elCoords }) =>
-      elCoords.x === coords.x && elCoords.y === coords.y,
-  )?.value;
+  const valueOnCoords = game.board.flat()[index];
 
   const isMoveValid = valueOnCoords === 0;
   if (!isMoveValid)
@@ -50,77 +53,41 @@ export const checkIfMoveIsValid = (
 };
 
 export const checkIfGameFinished = (
-  game: Game,
+  game: Board,
   player: 'computer' | 'human',
 ) => {
   const winingVariations = [
-    [
-      { x: 0, y: 0 },
-      { x: 1, y: 0 },
-      { x: 2, y: 0 },
-    ],
-    [
-      { x: 0, y: 1 },
-      { x: 1, y: 1 },
-      { x: 2, y: 1 },
-    ],
-    [
-      { x: 0, y: 2 },
-      { x: 1, y: 2 },
-      { x: 2, y: 2 },
-    ],
-    [
-      { x: 0, y: 0 },
-      { x: 1, y: 1 },
-      { x: 2, y: 2 },
-    ],
-    [
-      { x: 1, y: 0 },
-      { x: 1, y: 1 },
-      { x: 1, y: 2 },
-    ],
-    [
-      { x: 2, y: 0 },
-      { x: 2, y: 1 },
-      { x: 2, y: 2 },
-    ],
-    [
-      { x: 0, y: 0 },
-      { x: 1, y: 1 },
-      { x: 2, y: 2 },
-    ],
-    [
-      { x: 0, y: 2 },
-      { x: 1, y: 1 },
-      { x: 2, y: 0 },
-    ],
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8],
+    [0, 3, 6],
+    [1, 4, 7],
+    [2, 5, 8],
+    [0, 4, 8],
+    [2, 4, 6],
   ];
 
   return winingVariations.reduce((acc, variation) => {
-    const valuesInBoard = game.board.filter(({ coords }) =>
-      variation.some((val) => coords.x === val.x && coords.y === val.y),
-    );
+    const [first, second, last] = variation;
+    const valueToLookFor = player === 'computer' ? 1 : 2;
 
-    if (
-      valuesInBoard.every((point) => {
-        const whichValueToCheck = player === 'human' ? 1 : 2;
-        return point.value === whichValueToCheck;
-      })
-    )
-      return true;
+    const flattenBoard = game.board.flat();
+
+    const isWon =
+      flattenBoard[first] === valueToLookFor &&
+      flattenBoard[second] === valueToLookFor &&
+      flattenBoard[last] === valueToLookFor;
+    if (isWon) return true;
+
     return acc;
   }, false);
 };
 
-export const botMove = (game: Game): Point[] => {
-  const pointId = Math.floor(Math.random() * game.board.length);
+export const botMove = (game: Board): PointValue[][] => {
+  const pointIdx = Math.floor(Math.random() * game.board.length);
 
-  if (game.board[pointId].value === 0) {
-    const newBoard = createNewBoardWithChangedValue(
-      game,
-      game.board[pointId].coords,
-      2,
-    );
+  if (game.board.flat()[pointIdx] === 0) {
+    const newBoard = createNewBoardWithChangedValue(game, pointIdx, 2);
 
     return newBoard;
   }

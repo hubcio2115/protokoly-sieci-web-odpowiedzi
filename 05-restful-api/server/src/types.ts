@@ -1,11 +1,5 @@
-export interface Point {
-  value: 0 | 1 | 2;
-  coords: {
-    x: number;
-    y: number;
-  };
-}
+export type PointValue = 0 | 1 | 2;
 
-export interface Game {
-  board: Point[];
+export interface Board {
+  board: PointValue[][];
 }

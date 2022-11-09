@@ -1,6 +1,6 @@
 import { initTRPC } from '@trpc/server';
 import { createHTTPServer } from '@trpc/server/adapters/standalone';
-import { uuid } from 'uuidv4';
+import { v4 as uuid } from 'uuid';
 import { z } from 'zod';
 import {
   botMove,

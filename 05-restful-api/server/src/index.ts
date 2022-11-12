@@ -8,10 +8,10 @@ import {
   checkIfGameFinished,
   checkIfMoveIsValid,
   createNewBoardWithChangedValue,
-} from './utils';
-import type { Board, PointValue } from './types';
+} from './utils.js';
+import type { PointValue } from './types.js';
 
-const games = new Map<string, Board>();
+const games = new Map<string, PointValue[][]>();
 
 const t = initTRPC.create();
 
@@ -27,9 +27,10 @@ const appRouter = router({
       });
     });
 
-    games.set(newGameId, { board: newGameBoard });
+    games.set(newGameId, newGameBoard);
     return { id: newGameId, board: newGameBoard };
   }),
+
   endGame: publicProcedure.input(z.string().uuid()).query(({ input: id }) => {
     games.delete(id);
 
@@ -48,13 +49,15 @@ const appRouter = router({
 
       const newBoard = createNewBoardWithChangedValue(game, index, 1);
 
-      games.set(id, { board: newBoard });
+      if (checkIfGameFinished(newBoard, 'human'))
+        return 'game ended you win :)';
 
-      if (checkIfGameFinished(game, 'human')) return 'game ended you win :)';
+      if (newBoard.flat().every((el) => el === 0))
+        return 'game ended in a draw :)';
 
-      games.set(id, { board: botMove(game) });
+      games.set(id, botMove(newBoard));
 
-      if (checkIfGameFinished(game, 'computer'))
+      if (checkIfGameFinished(games.get(id)!, 'computer'))
         return 'game ended you lose :(';
 
       return { id, board: games.get(id)! };
@@ -72,7 +75,7 @@ const appRouter = router({
 
       const newBoard = createNewBoardWithChangedValue(game, index, 0);
 
-      games.set(id, { board: newBoard });
+      games.set(id, newBoard);
       return { id, board: newBoard };
     }),
 
@@ -87,17 +90,17 @@ const appRouter = router({
     .query(({ input: { id, coords, newCoords } }) => {
       const game = checkIfGameExists(id, games);
 
-      const point = game.board.flat()[coords];
+      const point = game.flat()[coords];
 
-      const pointToBeSwapped = game.board.flat()[coords];
+      const pointToBeSwapped = game.flat()[newCoords];
 
       const newBoard = createNewBoardWithChangedValue(
-        {
-          board: createNewBoardWithChangedValue(game, coords, pointToBeSwapped),
-        },
+        createNewBoardWithChangedValue(game, coords, pointToBeSwapped),
         newCoords,
         point,
       );
+
+      games.set(id, newBoard);
 
       return { id, board: newBoard };
     }),

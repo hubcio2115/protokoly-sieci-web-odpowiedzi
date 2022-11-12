@@ -3,10 +3,10 @@
   "version": "0.0.0",
   "description": "",
   "type": "module",
-  "main": "index.ts",
+  "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "ts-node-esm ./src/main.ts"
+    "start": "ts-node --esm --project ./tsconfig.json ./src/main.ts"
   },
   "keywords": [],
   "author": "",
@@ -14,15 +14,12 @@
   "dependencies": {
     "@trpc/client": "10.0.0-rc.7",
     "chalk": "^5.1.2",
-    "figlet": "^1.5.2",
-    "gradient-string": "^2.0.2",
     "inquirer": "^9.1.4",
-    "nanospinner": "^1.1.0",
-    "node": "^19.0.1",
-    "node-fetch": "^3.2.10",
+    "node": "18.12.1",
     "server": "server",
     "ts-node": "^10.9.1",
-    "typescript": "^4.6.4"
+    "typescript": "^4.6.4",
+    "zod": "^3.19.1"
   },
   "devDependencies": {
     "@types/figlet": "^1.5.5",

@@ -1,27 +1,30 @@
 import { TRPCError } from '@trpc/server';
-import type { PointValue, Board } from './types';
+import type { PointValue } from './types';
 
 export const createNewBoardWithChangedValue = (
-  game: Board,
+  game: PointValue[][],
   index: number,
   value: PointValue,
 ) => {
   return [
-    ...game.board.flat().slice(0, index),
+    ...game.flat().slice(0, index),
     value,
-    ...game.board.flat().slice(index + 1),
-  ].reduce((acc: PointValue[][], el, idx) => {
-    const currentRow = Math.floor(idx / 3);
+    ...game.flat().slice(index + 1),
+  ].reduce(
+    (acc: PointValue[][], el, idx) => {
+      const currentRow = Math.floor(idx / 3);
 
-    if (!acc[currentRow]) {
-      return [...acc, [el]];
-    }
-
-    return [...acc, [...acc[currentRow], el]];
-  }, []);
+      acc[currentRow] = acc[currentRow].concat(el);
+      return acc;
+    },
+    [[], [], []],
+  );
 };
 
-export const checkIfGameExists = (id: string, games: Map<string, Board>) => {
+export const checkIfGameExists = (
+  id: string,
+  games: Map<string, PointValue[][]>,
+) => {
   const game = games.get(id);
 
   if (!game)
@@ -35,12 +38,12 @@ export const checkIfGameExists = (id: string, games: Map<string, Board>) => {
 
 export const checkIfMoveIsValid = (
   id: string,
-  games: Map<string, Board>,
+  games: Map<string, PointValue[][]>,
   index: number,
 ) => {
   const game = checkIfGameExists(id, games);
 
-  const valueOnCoords = game.board.flat()[index];
+  const valueOnCoords = game.flat()[index];
 
   const isMoveValid = valueOnCoords === 0;
   if (!isMoveValid)
@@ -53,7 +56,7 @@ export const checkIfMoveIsValid = (
 };
 
 export const checkIfGameFinished = (
-  game: Board,
+  game: PointValue[][],
   player: 'computer' | 'human',
 ) => {
   const winingVariations = [
@@ -69,9 +72,9 @@ export const checkIfGameFinished = (
 
   return winingVariations.reduce((acc, variation) => {
     const [first, second, last] = variation;
-    const valueToLookFor = player === 'computer' ? 1 : 2;
+    const valueToLookFor = player === 'human' ? 1 : 2;
 
-    const flattenBoard = game.board.flat();
+    const flattenBoard = game.flat();
 
     const isWon =
       flattenBoard[first] === valueToLookFor &&
@@ -83,14 +86,14 @@ export const checkIfGameFinished = (
   }, false);
 };
 
-export const botMove = (game: Board): PointValue[][] => {
-  const pointIdx = Math.floor(Math.random() * game.board.length);
+export const botMove = (game: PointValue[][]): PointValue[][] => {
+  const freeIndexes = game.flat().reduce((acc: number[], el, index) => {
+    return el === 0 ? [...acc, index] : acc;
+  }, []);
 
-  if (game.board.flat()[pointIdx] === 0) {
-    const newBoard = createNewBoardWithChangedValue(game, pointIdx, 2);
+  const pointIdx = freeIndexes[Math.floor(Math.random() * freeIndexes.length)];
 
-    return newBoard;
-  }
+  const newBoard = createNewBoardWithChangedValue(game, pointIdx, 2);
 
-  return botMove(game);
+  return newBoard;
 };

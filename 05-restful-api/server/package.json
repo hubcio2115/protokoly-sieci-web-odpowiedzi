@@ -3,10 +3,10 @@
   "version": "0.0.0",
   "description": "",
   "main": "index.js",
-  "type": "commonjs",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon -e ts -w . -x ts-node ./src/index",
+    "dev": "nodemon -e ts -w . -x ts-node --esm ./src/index.ts",
     "ts-node": "ts-node"
   },
   "keywords": [],

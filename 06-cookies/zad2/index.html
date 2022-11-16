@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
+    <script src="./script.js" defer></script>
+    <title>Document</title>
+  </head>
+  <body>
+    <form method="">
+      <input type="text" name="name" id="name" />
+
+      <input type="text" name="surname" id="surname" />
+
+      <button type="submit">Zaloguj</button>
+      <button type="button" onclick="resetCookies()">
+        Zresetuj Ciasteczka
+      </button>
+    </form>
+
+    <div>
+      <p id="imie"></p>
+
+      <p id="licznik" style="display: none">
+        Pierwszy raz odwiedzasz naszą stronę :|
+      </p>
+    </div>
+  </body>
+</html>
